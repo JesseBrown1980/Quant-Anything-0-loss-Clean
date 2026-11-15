@@ -135,6 +135,14 @@ Measured on enwik8 (100,000,000 bytes):
 | Leaves 0, 1 alone | held, 0 bytes emitted |
 | One bit changed in one leaf, then rebuilt | SHA-256 `3834a93b…` against enwik8's `2b49720e…`; the rebuild is rejected |
 
+Measured on enwik10 (10,000,000,000 bytes):
+
+| | Measured |
+|---|---|
+| Seven leaves | 5,000,000,000 bytes each, written in 552 seconds |
+| Rebuilt from leaves 2, 4, 6 alone | 10,000,000,000 bytes, SHA-256 `14a033c6…5f52`, equal to enwik10's, 1,018 seconds |
+| Leaves 0, 1 alone | held, 0 bytes emitted |
+
 ## The kernel and the key
 
 [`kernel-and-key/`](kernel-and-key/) holds the Asolaria kernel and the constellation key as they are on the operator's
