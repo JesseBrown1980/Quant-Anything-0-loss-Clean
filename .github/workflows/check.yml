@@ -1,0 +1,54 @@
+name: check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: files match SHA256SUMS
+        run: sha256sum -c SHA256SUMS
+      - name: Rust 1.81, clippy and build
+        run: |
+          rustup toolchain install 1.81.0 --profile minimal --component clippy
+          cargo +1.81.0 clippy --release --manifest-path rust/Cargo.toml -- -D warnings
+          cargo +1.81.0 build --release --manifest-path rust/Cargo.toml
+          cargo +1.81.0 clippy --release --manifest-path rust-leaves/Cargo.toml -- -D warnings
+          cargo +1.81.0 build --release --manifest-path rust-leaves/Cargo.toml
+      - name: the example, 95,823,079 bytes of enwik10 from the key and 14,000 rooms
+        run: |
+          xz -d -c master-key/masterkey.xz > key.raw
+          rust/target/release/asolaria_codex unpack key.raw 2 example/enwik10-first-rooms/enwik10-first-14000.rooms first.bin | tee row.txt
+          echo "65775c95ba220e9cc45bf6f2e80ce2ab738a78e1bb89ed9dbfa29f8a5980835b  first.bin" | sha256sum -c
+          test "$(stat -c%s first.bin)" = 95823079
+      - name: pack the returned bytes again and get the same rooms and stubs
+        run: |
+          rust/target/release/asolaria_codex pack key.raw 2 first.bin again.rooms again.stubs
+          cmp again.rooms example/enwik10-first-rooms/enwik10-first-14000.rooms
+          cmp again.stubs example/enwik10-first-rooms/enwik10-first-14000.stubs
+      - name: the master key round trip
+        run: |
+          rust/target/release/asolaria_codex dec key.raw 2 master-key/stream.bin 4194304 decoded.bin
+          echo "5ba647fec2ba51b0383cbe7147e15a478d85613245b7131c41764dbdd5062f77  decoded.bin" | sha256sum -c
+          rust/target/release/asolaria_codex enc key.raw 2 decoded.bin 4194304 again.bin
+          cmp again.bin master-key/stream.bin
+      - name: a single codex is 3,200 bytes and repeats
+        run: |
+          rust/target/release/asolaria_codex drill first.bin a.qr
+          rust/target/release/asolaria_codex drill first.bin b.qr
+          test "$(stat -c%s a.qr)" = 3200
+          cmp a.qr b.qr
+      - name: leaves, three rebuild and two hold
+        run: |
+          rust-leaves/target/release/path2_driver black first.bin leaves
+          rust-leaves/target/release/path2_driver white leaves 2 4 6 95823079 back.bin
+          cmp back.bin first.bin
+          rust-leaves/target/release/path2_driver hold leaves 0 1 95823079 | tee hold.txt
+          grep -q "outcome=HELD" hold.txt
