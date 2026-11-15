@@ -15,6 +15,7 @@ The full record (every run, the earlier programs, the kernel, the GGUF bodies) i
 | [`master-key/masterkey.xz`](master-key/) | The master key, packed. Unpacked it is 33,554,432 bytes | 549,112 |
 | [`master-key/stream.bin`](master-key/) | 4,194,304 bytes of enwik8, coded against the master key | 1,711,250 |
 | [`example/enwik10-first-rooms/`](example/enwik10-first-rooms/) | The first 14,000 room codexes of enwik10 (3,200 bytes each) and their 8-byte stubs | 44,800,000 + 112,000 |
+| [`kernel-and-key/`](kernel-and-key/) | The Asolaria kernel and the constellation key, 3,174 bytes each, with their hashes, the key's row file, the PLAYBOOK and the CODEBOOK | 3,174 + 3,174 |
 | [`codexes/enwik10.qr`](codexes/) | The single 3,200-byte codex of the whole of enwik10 | 3,200 |
 | [`codexes/wiki.qr`](codexes/) | The single 3,200-byte codex of enwik8 | 3,200 |
 | [`SHA256SUMS`](SHA256SUMS) | SHA-256 of every file above | |
@@ -133,6 +134,22 @@ Measured on enwik8 (100,000,000 bytes):
 | Rebuilt from leaves 0, 1, 2 alone | identical to enwik8 |
 | Leaves 0, 1 alone | held, 0 bytes emitted |
 | One bit changed in one leaf, then rebuilt | SHA-256 `3834a93b…` against enwik8's `2b49720e…`; the rebuild is rejected |
+
+## The kernel and the key
+
+[`kernel-and-key/`](kernel-and-key/) holds the Asolaria kernel and the constellation key as they are on the operator's
+machine, byte for byte.
+
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| `ASOLARIA-KERNEL-3174.bin` | 3,174 | `202ff2f06af54788958a03f60245593f89a88b0a3a4fc76435ad8468f151dc98` |
+| `ASOLARIA-KERNEL-3174.kernel-pump-copy.bin` | 3,174 | `f075f5c64d656ae3afa91c793ab2c74b5425e41de141d6b7dc5cf4605663b0ca` |
+| `ASOLARIA-CONSTELLATION-KEY-3174.bin` | 3,174 | `cce4f1e8ae407f108b5c122e764f0b4c3882ce059cf900a0cc1b2a0e7588c1ea` |
+
+`KEY-3174.hbp` is the key's own row file. `PLAYBOOK.md` and `CODEBOOK.md` are the July instructions for the kernel
+pump, and `_spheres_desc.txt` describes the spheres. The two smaller `.bin` files are the bodies the pump programs
+were run on. The pump programs themselves are in the full repository under
+[`programs/kernel-pump`](https://github.com/JesseBrown1980/Quant-anything-0-loss/tree/main/programs/kernel-pump).
 
 ## Program reference
 
